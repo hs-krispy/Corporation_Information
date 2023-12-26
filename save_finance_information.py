@@ -24,13 +24,14 @@ new_corporation_name = list(set(corporation_name) - set(exist_corporation_name))
 finance_info_list = []
 
 for corp_name in new_corporation_name:
+    corp_name = corp_name.split('(')[0]
     informations = scarp_info(corp_name)
     if informations is None:
         finance_info_list.append(pd.DataFrame({i: [corp_name if i == 'name' else 'None'] for i in ['name', '계정과목/연도', '2020', '2021', '2022']}))
         continue
     finance_info_list.append(get_info(informations[0].split(' '), informations[1], corp_name))
 
-corp_finance_df = pd.concat(finance_info_list, axis=0)    
+corp_finance_df = pd.concat(finance_info_list, axis=0).fillna('Unknown')    
 print(corp_finance_df)
 if len(set(corporation_name)) == len(new_corporation_name):
     set_with_dataframe(worksheet=finance_information, dataframe=corp_finance_df, include_index=False, include_column_header=True, resize=True)
