@@ -23,6 +23,7 @@ selected_info = ['매출액', '매출원가', '매출총이익', '판매비와 �
 
 # 스타트업 재무제표
 driver.get("https://www.smes.go.kr/venturein/home/viewHome")
+time.sleep(1)
 
 def search_target_corp(corparation_name):
     driver.find_element(By.ID, 'totalSearch').click()
@@ -31,12 +32,21 @@ def search_target_corp(corparation_name):
     driver.find_element(By.ID, 'totalSearch').send_keys(corparation_name)
     driver.find_element(By.ID, 'totalSearch').send_keys(Keys.ENTER)
     driver.find_element(By.XPATH, '//*[@id="real_contents"]/div[2]/ul/li[3]/a').click()
-    time.sleep(0.5)
+    time.sleep(1)
     
 def scarp_info(corparation_name):
     try:
         search_target_corp(corparation_name)
-        driver.find_element(By.XPATH, '//*[@id="real_contents"]/div[2]/div[2]/table/tbody/tr/td[1]/a').send_keys(Keys.ENTER)
+        corp_list = driver.find_elements(By.CLASS_NAME, 'tsch_bl_tit')
+        check = False
+        for corp in corp_list:
+            corp_name = corp.text
+            if re.search(r'{}'.format(corparation_name), corp_name) is not None:
+                check = True
+                corp.send_keys(Keys.ENTER)
+                break
+        if not check:
+            raise Exception
     except:
         print('no search result')
         return
@@ -90,4 +100,3 @@ def get_info(column_names, info_text, corp_name):
     result_df['name'] = corp_name
     
     return result_df[['name'] + column_names]
-
