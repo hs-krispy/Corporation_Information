@@ -14,7 +14,7 @@ save_job_info()
 
 gs = gc.open('crawling_data')
 job_information = gs.worksheet('job_information')
-finance_information = gs.worksheet('finance_information')
+finance_information = gs.worksheet('finance_information2')
 
 corporation_name = job_information.col_values(1)[1:]
 exist_corporation_name = finance_information.col_values(1)
@@ -32,8 +32,16 @@ for corp_name in new_corporation_name:
     finance_info_list.append(get_info(informations[0].split(' '), informations[1], corp_name))
 
 corp_finance_df = pd.concat(finance_info_list, axis=0).fillna('Unknown')    
-print(corp_finance_df)
+result_df = corp_finance_df.pivot_table(index='name', columns='계정과목/연도', values=['2020', '2021', '2022'], aggfunc='max').stack(level=0)
+result_df['영업이익률'] = result_df.apply(lambda x: None if (isinstance(x['영업손익'], str)) & (isinstance(x['매출액'], str)) \
+    else x['영업손익'] / x['매출액'] if x['매출액'] > 0 else None, axis=1)
+result_df = result_df.reset_index().rename(columns={'level_1': '연도'})
+column_list = result_df.columns.tolist()
+column_list.remove('None')
+result_df = result_df[column_list]
+
+print(result_df)
 if len(set(corporation_name)) == len(new_corporation_name):
-    set_with_dataframe(worksheet=finance_information, dataframe=corp_finance_df, include_index=False, include_column_header=True, resize=True)
+    set_with_dataframe(worksheet=finance_information, dataframe=result_df, include_index=False, include_column_header=True, resize=True)
 else:
-    gs.values_append('finance_information', {'valueInputOption': 'RAW'}, {'values': corp_finance_df.values.tolist()})
+    gs.values_append('finance_information2', {'valueInputOption': 'RAW'}, {'values': result_df.values.tolist()})
