@@ -55,15 +55,14 @@ def get_job_info(keyword):
     job_div = driver.find_element(By.XPATH, '//*[@id="search_tabpanel_position"]/div/div[4]')
     job_links = job_div.find_elements(By.TAG_NAME, 'a')
     
-    job_info_df = pd.DataFrame(list(zip(map(lambda x: x.text, job_corp_names), 
-                                   map(lambda x: x.text, job_locations), 
-                                   map(lambda x: x.text, job_position_names),
-                                    map(lambda x: x.get_attribute('href'), job_links))),
+    job_info_df = pd.DataFrame(list(zip([value for value in list(map(lambda x: x.text, job_corp_names)) if value != ''], 
+                                   [value for value in list(map(lambda x: x.text, job_locations)) if value != ''],
+                                   [value for value in list(map(lambda x: x.text, job_position_names)) if value != ''],
+                                   [value for value in list(map(lambda x: x.get_attribute('href'), job_links)) if value != ''])),
                                columns=['name', 'location', 'position', 'link'])
-
+    
     selected_job_info_df = job_info_df[(job_info_df.location.apply(lambda x: True if re.search(r'서울|경기', x) is not None else False))
                 & (job_info_df.position.apply(lambda x: True if re.search(r'data|데이터', x.lower()) is not None else False))
                 & (job_info_df.position.apply(lambda x: True if re.search(r'analyst|scientist|과학|분석|애널리스트|사이언티스트', x.lower()) is not None else False))]
     
     return selected_job_info_df
-    
