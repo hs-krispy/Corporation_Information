@@ -40,9 +40,6 @@ if len(new_corporation_name) > 0:
         result_df['영업이익률'] = result_df.apply(lambda x: None if (isinstance(x['영업손익'], str)) & (isinstance(x['매출액'], str)) \
             else x['영업손익'] / x['매출액'] if x['매출액'] > 0 else None, axis=1)
         result_df = result_df.reset_index().rename(columns={'level_1': '연도'})
-        column_list = result_df.columns.tolist()
-        column_list.remove('None')
-        result_df = result_df[column_list]
         result_df = pd.concat([result_df, pd.DataFrame({'name': not_found_corp_list})], axis=0).fillna('Unknown')
     else:
         result_df = pd.DataFrame({'name': not_found_corp_list})
